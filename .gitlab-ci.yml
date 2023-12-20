@@ -1,0 +1,22 @@
+image: docker:stable
+
+variables:
+  PROJECT_NAME: builder-go
+  CONTAINER_IMAGE: kiga-hub/dev/$PROJECT_NAME
+
+cache:
+  key: ${CI_COMMIT_REF_SLUG}
+
+stages:
+  - docker-build
+
+build-image:
+  stage: docker-build
+  image:
+    name: kiga-hub/dev/docker:stable
+    entrypoint: [""]
+  script:
+    - docker login -u functional -p "$HARBOR_FUNCTIONAL_TOKEN" kiga-hub
+    - docker build --build-arg GITLAB_FUNCTIONAL_TOKEN=${GITLAB_FUNCTIONAL_TOKEN} -t $CONTAINER_IMAGE:$CI_COMMIT_BRANCH .
+    - docker push $CONTAINER_IMAGE:$CI_COMMIT_BRANCH
+    - docker rmi $CONTAINER_IMAGE:$CI_COMMIT_BRANCH
